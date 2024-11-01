@@ -110,7 +110,6 @@ const calculateAngle = (center, point1, point2) => {
   const clampedCos = Math.max(-1, Math.min(1, cosAngle));
   return Math.acos(clampedCos) * (180 / Math.PI);
 };
-
 const comparePoses = (userPose, samplePose) => {
   try {
     // First check if user is in neutral pose
@@ -131,11 +130,11 @@ const comparePoses = (userPose, samplePose) => {
       return { score: 0, details: {} };
     }
 
-    // Compare angles for each arm
+    // Compare angles for each arm - SWAPPED left and right for user pose
     const leftArmAngleUser = calculateAngle(
-      normalizedUser.leftShoulder,
-      normalizedUser.leftElbow,
-      normalizedUser.leftWrist
+      normalizedUser.rightShoulder, // Changed from leftShoulder
+      normalizedUser.rightElbow,    // Changed from leftElbow
+      normalizedUser.rightWrist     // Changed from leftWrist
     );
 
     const leftArmAngleSample = calculateAngle(
@@ -145,9 +144,9 @@ const comparePoses = (userPose, samplePose) => {
     );
 
     const rightArmAngleUser = calculateAngle(
-      normalizedUser.rightShoulder,
-      normalizedUser.rightElbow,
-      normalizedUser.rightWrist
+      normalizedUser.leftShoulder,  // Changed from rightShoulder
+      normalizedUser.leftElbow,     // Changed from rightElbow
+      normalizedUser.leftWrist      // Changed from rightWrist
     );
 
     const rightArmAngleSample = calculateAngle(
@@ -160,9 +159,9 @@ const comparePoses = (userPose, samplePose) => {
     const leftArmScore = Math.max(0, 1 - Math.abs(leftArmAngleUser - leftArmAngleSample) / ANGLE_THRESHOLD);
     const rightArmScore = Math.max(0, 1 - Math.abs(rightArmAngleUser - rightArmAngleSample) / ANGLE_THRESHOLD);
 
-    // Check for minimum movement
-    const leftWristMovement = Math.abs(normalizedUser.leftWrist.y - normalizedUser.leftShoulder.y);
-    const rightWristMovement = Math.abs(normalizedUser.rightWrist.y - normalizedUser.rightShoulder.y);
+    // Check for minimum movement - SWAPPED for user pose
+    const leftWristMovement = Math.abs(normalizedUser.rightWrist.y - normalizedUser.rightShoulder.y);  // Changed from left to right
+    const rightWristMovement = Math.abs(normalizedUser.leftWrist.y - normalizedUser.leftShoulder.y);   // Changed from right to left
 
     if (leftWristMovement < MIN_MOVEMENT_THRESHOLD && rightWristMovement < MIN_MOVEMENT_THRESHOLD) {
       return {
@@ -173,7 +172,7 @@ const comparePoses = (userPose, samplePose) => {
       };
     }
 
-    // Calculate final score with no boosting
+    // Calculate final score
     const finalScore = (leftArmScore + rightArmScore) / 2;
 
     return {
@@ -188,7 +187,6 @@ const comparePoses = (userPose, samplePose) => {
     return { score: 0, details: {} };
   }
 };
-
 // Shorter history for more responsive scoring
 let scoreHistory = new Array(3).fill(0);
 

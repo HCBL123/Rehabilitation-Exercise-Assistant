@@ -2,120 +2,175 @@
 
 class ExercisePerformance {
   constructor() {
-    this.scores = [];
     this.startTime = Date.now();
-    this.repetitions = 0;
+    this.scores = [];
+    this.recentScores = []; // For tracking recent performance
     this.peakScore = 0;
+    this.repetitions = 0;
     this.lastStableScore = 0;
-    this.isInMotion = false;
-    this.motionStartTime = null;
-    this.areaPerfomance = {
+    this.stabilityThreshold = 5; // seconds
+    this.lastStabilityTime = 0;
+    this.repetitionThreshold = 0.3; // 30% change for new repetition
+    this.areaPerformance = {
       leftArm: [],
       rightArm: []
     };
   }
 
-  // Detect repetitions based on pose transitions
-  updateMotionState(currentScore, threshold = 0.3) {
-    const isCurrentlyInMotion = currentScore > threshold;
+  updateMetrics(score, details) {
+    const currentTime = Date.now();
 
-    if (isCurrentlyInMotion && !this.isInMotion) {
-      // Starting a new motion
-      this.isInMotion = true;
-      this.motionStartTime = Date.now();
-    } else if (!isCurrentlyInMotion && this.isInMotion) {
-      // Completed a motion
-      this.isInMotion = false;
-      if (this.motionStartTime && (Date.now() - this.motionStartTime) > 500) {
-        this.repetitions++;
+    // Only consider scores above a minimum threshold (e.g., 10%)
+    if (score > 10) {
+      this.scores.push({
+        score,
+        timestamp: currentTime
+      });
+
+      // Update peak performance
+      this.peakScore = Math.max(this.peakScore, score);
+
+      // Update area-specific performance
+      if (details) {
+        if (details.leftArm > 0.1) this.areaPerformance.leftArm.push(details.leftArm);
+        if (details.rightArm > 0.1) this.areaPerformance.rightArm.push(details.rightArm);
       }
+
+      // Track recent scores for repetition detection
+      this.recentScores.push(score);
+      if (this.recentScores.length > 10) this.recentScores.shift();
+
+      // Detect repetitions based on score patterns
+      this.detectRepetition(score, currentTime);
     }
   }
 
-  // Update performance metrics with new pose data
-  updateMetrics(score, areaScores) {
-    this.scores.push(score);
-    this.peakScore = Math.max(this.peakScore, score);
+  detectRepetition(currentScore, currentTime) {
+    // Only consider stable scores (maintain similar score for some time)
+    if (Math.abs(currentScore - this.lastStableScore) <= 15) {
+      if (currentTime - this.lastStabilityTime >= this.stabilityThreshold * 1000) {
+        // Check if there was a significant change before stability
+        const avgRecentScore = this.recentScores.reduce((a, b) => a + b, 0) / this.recentScores.length;
+        if (Math.abs(avgRecentScore - this.lastStableScore) >= this.repetitionThreshold * 100) {
+          this.repetitions++;
+          this.lastStableScore = currentScore;
+        }
+      }
+    } else {
+      this.lastStabilityTime = currentTime;
+      this.lastStableScore = currentScore;
+    }
+  }
 
-    if (areaScores) {
-      if (areaScores.leftArm) {
-        this.areaPerfomance.leftArm.push(areaScores.leftArm);
+  generateReport() {
+    const endTime = Date.now();
+    const duration = Math.floor((endTime - this.startTime) / 1000);
+
+    // Filter out very low scores that might be noise
+    const validScores = this.scores.filter(s => s.score > 20);
+
+    // Calculate average score with more weight to recent scores
+    const recentScoreWeight = 0.7;
+    const historicalScoreWeight = 0.3;
+
+    const recentScores = validScores.slice(-Math.min(10, validScores.length));
+    const historicalScores = validScores.slice(0, -Math.min(10, validScores.length));
+
+    const recentAverage = recentScores.length > 0
+      ? recentScores.reduce((a, b) => a + b.score, 0) / recentScores.length
+      : 0;
+
+    const historicalAverage = historicalScores.length > 0
+      ? historicalScores.reduce((a, b) => a + b.score, 0) / historicalScores.length
+      : 0;
+
+    const weightedAverage = Math.round(
+      (recentAverage * recentScoreWeight) +
+      (historicalAverage * historicalScoreWeight)
+    );
+
+    // Calculate consistency score
+    const consistencyScore = this.calculateConsistencyScore(validScores);
+
+    // Calculate area-specific scores
+    const areaScores = {
+      leftArm: this.calculateAreaScore(this.areaPerformance.leftArm),
+      rightArm: this.calculateAreaScore(this.areaPerformance.rightArm)
+    };
+
+    // Calculate improvement rate
+    const improvementRate = this.calculateImprovementRate(validScores);
+
+    return {
+      averageScore: weightedAverage,
+      duration: this.formatDuration(duration),
+      totalRepetitions: this.repetitions,
+      peakPerformance: Math.round(this.peakScore),
+      consistencyScore: Math.round(consistencyScore),
+      improvementRate,
+      areas: {
+        leftArm: {
+          score: Math.round(areaScores.leftArm * 100),
+          message: this.getAreaMessage(areaScores.leftArm)
+        },
+        rightArm: {
+          score: Math.round(areaScores.rightArm * 100),
+          message: this.getAreaMessage(areaScores.rightArm)
+        }
       }
-      if (areaScores.rightArm) {
-        this.areaPerfomance.rightArm.push(areaScores.rightArm);
-      }
+    };
+  }
+
+  calculateConsistencyScore(scores) {
+    if (scores.length < 2) return 0;
+
+    // Calculate moving average variance
+    const variations = [];
+    const windowSize = 5;
+
+    for (let i = windowSize; i < scores.length; i++) {
+      const window = scores.slice(i - windowSize, i);
+      const avg = window.reduce((a, b) => a + b.score, 0) / windowSize;
+      const variance = window.reduce((a, b) => a + Math.pow(b.score - avg, 2), 0) / windowSize;
+      variations.push(variance);
     }
 
-    this.updateMotionState(score);
+    const avgVariation = variations.reduce((a, b) => a + b, 0) / variations.length;
+    // Convert variance to a 0-100 score (lower variance = higher consistency)
+    return Math.max(0, 100 - (Math.sqrt(avgVariation) * 2));
   }
 
-  // Calculate consistency score based on standard deviation
-  calculateConsistency() {
-    if (this.scores.length < 2) return 0;
-
-    const mean = this.scores.reduce((a, b) => a + b, 0) / this.scores.length;
-    const variance = this.scores.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / this.scores.length;
-    const standardDeviation = Math.sqrt(variance);
-
-    // Convert to a 0-100 score where lower deviation means higher consistency
-    return Math.max(0, 100 - (standardDeviation * 20));
+  calculateAreaScore(scores) {
+    if (scores.length === 0) return 0;
+    // Use exponential moving average with more weight to recent scores
+    const alpha = 0.3;
+    return scores.reduce((acc, score, i) => {
+      return acc * (1 - alpha) + score * alpha;
+    }, scores[0]);
   }
 
-  // Calculate improvement rate
-  calculateImprovementRate() {
-    if (this.scores.length < 6) return 0;
+  calculateImprovementRate(scores) {
+    if (scores.length < 4) return 0;
 
-    const firstThird = this.scores.slice(0, Math.floor(this.scores.length / 3));
-    const lastThird = this.scores.slice(-Math.floor(this.scores.length / 3));
+    const firstQuarter = scores.slice(0, Math.floor(scores.length / 4));
+    const lastQuarter = scores.slice(-Math.floor(scores.length / 4));
 
-    const initialAvg = firstThird.reduce((a, b) => a + b, 0) / firstThird.length;
-    const finalAvg = lastThird.reduce((a, b) => a + b, 0) / lastThird.length;
+    const initialAvg = firstQuarter.reduce((a, b) => a + b.score, 0) / firstQuarter.length;
+    const finalAvg = lastQuarter.reduce((a, b) => a + b.score, 0) / lastQuarter.length;
 
     return Math.round(((finalAvg - initialAvg) / initialAvg) * 100);
   }
 
-  // Calculate area-specific performance
-  calculateAreaPerformance() {
-    const calculateAreaStats = (scores) => {
-      if (scores.length === 0) return { score: 0, message: 'Không có dữ liệu' };
-
-      const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length * 100;
-      const score = Math.round(avgScore);
-
-      let message;
-      if (score >= 80) message = 'Rất tốt, duy trì phong độ';
-      else if (score >= 60) message = 'Tốt, cần giữ ổn định hơn';
-      else message = 'Cần cải thiện độ chính xác';
-
-      return { score, message };
-    };
-
-    return {
-      leftArm: calculateAreaStats(this.areaPerfomance.leftArm),
-      rightArm: calculateAreaStats(this.areaPerfomance.rightArm)
-    };
+  formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
   }
 
-  // Generate final performance report
-  generateReport() {
-    const duration = Math.floor((Date.now() - this.startTime) / 1000);
-    const minutes = Math.floor(duration / 60);
-    const seconds = duration % 60;
-
-    const averageScore = this.scores.length > 0
-      ? Math.round(this.scores.reduce((a, b) => a + b, 0) / this.scores.length * 100)
-      : 0;
-
-    return {
-      averageScore,
-      duration: `${minutes}:${seconds.toString().padStart(2, '0')}`,
-      totalRepetitions: this.repetitions,
-      peakPerformance: Math.round(this.peakScore * 100),
-      consistencyScore: Math.round(this.calculateConsistency()),
-      improvementRate: this.calculateImprovementRate(),
-      performanceOverTime: this.scores.map(score => Math.round(score * 100)),
-      areas: this.calculateAreaPerformance()
-    };
+  getAreaMessage(score) {
+    if (score >= 0.8) return 'Rất tốt, duy trì phong độ';
+    if (score >= 0.6) return 'Tốt, cần giữ ổn định hơn';
+    return 'Cần cải thiện độ chính xác';
   }
 }
 
