@@ -8,6 +8,7 @@ import { Pose } from '@mediapipe/pose';
 import { calculatePoseSimilarity } from './PoseComparison';
 import { adviceManager } from '../utils/poseAdvice';
 import { drawPoseResults } from './PoseDrawing';
+import ExercisePerformance from '../utils/ExercisePerformance'; // Add this line
 
 // Score Display Component
 const ScoreDisplay = ({ score, feedback, advice }) => {
@@ -101,10 +102,88 @@ const EnhancedExerciseComparison = ({ exercise }) => {
   const scoreHistory = useRef([]);
   const lastScoreUpdateTime = useRef(0);
   const lastPoseRef = useRef(null);
+  const performanceTrackerRef = useRef(null); // Add this line
+
+  const [sessionData, setSessionData] = useState({
+    scores: [],
+    startTime: null,
+    peakPerformance: 0,
+    totalRepetitions: 0,
+    consistencyScore: 0,
+    areas: {
+      leftArm: { score: 0, message: '' },
+      rightArm: { score: 0, message: '' }
+    }
+  });
+
+  // Add this with your other refs
+  const scoreTracking = useRef({
+    lastStableScore: 0,
+    stableScoreTimer: null,
+    repetitionCounted: false,
+    lastUpdateTime: Date.now(),
+    scoreBuffer: []
+  });
 
   // Constants for motion detection
   const MOTION_THRESHOLD = 0.01;
   const INACTIVITY_PENALTY_RATE = 15;
+
+
+  const getAreaMessage = (score) => {
+    if (score >= 80) return 'Rất tốt, duy trì phong độ';
+    if (score >= 60) return 'Tốt, cần giữ ổn định hơn';
+    return 'Cần cải thiện độ chính xác';
+  };
+
+  const calculateImprovementRate = (scores) => {
+    if (scores.length < 2) return 0;
+
+    const firstScores = scores.slice(0, Math.min(3, Math.floor(scores.length / 3)));
+    const lastScores = scores.slice(-Math.min(3, Math.floor(scores.length / 3)));
+
+    const initialAvg = firstScores.reduce((a, b) => a + b, 0) / firstScores.length;
+    const finalAvg = lastScores.reduce((a, b) => a + b, 0) / lastScores.length;
+
+    return Math.round(((finalAvg - initialAvg) / initialAvg) * 100);
+  };
+
+  const updateSessionData = (newScore, details) => {
+    setSessionData(prev => {
+      // Update scores history
+      const scores = [...prev.scores, newScore];
+
+      // Update peak performance
+      const peakPerformance = Math.max(prev.peakPerformance, newScore);
+
+      // Calculate consistency score
+      const recentScores = scores.slice(-10);
+      const avgScore = recentScores.reduce((a, b) => a + b, 0) / recentScores.length;
+      const variance = recentScores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / recentScores.length;
+      const consistencyScore = Math.max(0, 100 - Math.sqrt(variance));
+
+      // Update area-specific scores and messages
+      const leftArmScore = details?.leftArm * 100 || prev.areas.leftArm.score;
+      const rightArmScore = details?.rightArm * 100 || prev.areas.rightArm.score;
+
+      return {
+        ...prev,
+        scores,
+        peakPerformance,
+        consistencyScore,
+        areas: {
+          leftArm: {
+            score: leftArmScore,
+            message: getAreaMessage(leftArmScore)
+          },
+          rightArm: {
+            score: rightArmScore,
+            message: getAreaMessage(rightArmScore)
+          }
+        }
+      };
+    });
+  };
 
   const detectMotionAndUpdateScore = (currentPose, similarity) => {
     const currentTime = Date.now();
@@ -145,26 +224,46 @@ const EnhancedExerciseComparison = ({ exercise }) => {
     const animateScore = () => {
       if (isCleanedUpRef.current) return;
 
-      // Update score history
       const currentTime = Date.now();
-      if (currentTime - lastScoreUpdateTime.current > 500) {
-        scoreHistory.current.push(actualScore);
-        if (scoreHistory.current.length > 10) {
-          scoreHistory.current.shift();
-        }
-        lastScoreUpdateTime.current = currentTime;
-      }
 
-      // Calculate score trend
-      const trend = scoreHistory.current.length > 1
-        ? (scoreHistory.current[scoreHistory.current.length - 1] -
-          scoreHistory.current[0]) / scoreHistory.current.length
-        : 0;
+      // Update score history
+      if (currentTime - scoreTracking.current.lastUpdateTime > 500) {
+        // Add to score buffer
+        scoreTracking.current.scoreBuffer.push(actualScore);
+
+        // Keep buffer at reasonable size
+        if (scoreTracking.current.scoreBuffer.length > 5) {
+          const avgScore = scoreTracking.current.scoreBuffer.reduce((a, b) => a + b, 0) /
+            scoreTracking.current.scoreBuffer.length;
+
+          // Check if score is stable
+          const isStable = scoreTracking.current.scoreBuffer.every(
+            score => Math.abs(score - avgScore) < 10
+          );
+
+          if (isStable && !scoreTracking.current.repetitionCounted) {
+            setSessionData(prev => ({
+              ...prev,
+              totalRepetitions: prev.totalRepetitions + 1
+            }));
+            scoreTracking.current.repetitionCounted = true;
+          } else if (!isStable) {
+            scoreTracking.current.repetitionCounted = false;
+          }
+
+          // Update session data with current performance
+          updateSessionData(avgScore * 100, lastPoseResultsRef.current?.details);
+
+          // Clear buffer
+          scoreTracking.current.scoreBuffer = [];
+        }
+
+        scoreTracking.current.lastUpdateTime = currentTime;
+      }
 
       setDisplayScore(prev => {
         const diff = actualScore - prev;
-        // Slower decrease, faster increase for positive trends
-        const changeRate = trend > 0 ? 0.15 : 0.05;
+        const changeRate = scoreTracking.current.scoreBuffer.length > 0 ? 0.15 : 0.05;
         if (Math.abs(diff) < 0.1) return actualScore;
         return prev + diff * changeRate;
       });
@@ -179,8 +278,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
         cancelAnimationFrame(scoreAnimationRef.current);
       }
     };
-  }, [actualScore, lastMotionTime]);
-
+  }, [actualScore]);
   // Modify your mainPose.onResults handler
   const initializePoseDetectors = async () => {
     try {
@@ -199,7 +297,6 @@ const EnhancedExerciseComparison = ({ exercise }) => {
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
       });
-
       mainPose.onResults((results) => {
         if (!isCleanedUpRef.current) {
           drawPoseResults(results, canvasRef.current, videoRef.current, true);
@@ -210,6 +307,11 @@ const EnhancedExerciseComparison = ({ exercise }) => {
             if (similarity) {
               // Apply motion detection and inactivity penalty
               const adjustedScore = detectMotionAndUpdateScore(results, similarity);
+
+              // Update performance tracker
+              if (performanceTrackerRef.current) {
+                performanceTrackerRef.current.updateMetrics(adjustedScore, similarity.details);
+              }
 
               // Update score and feedback
               setActualScore(adjustedScore);
@@ -282,10 +384,27 @@ const EnhancedExerciseComparison = ({ exercise }) => {
     }
   };
 
+  // Replace the existing startExercise function
   const startExercise = async () => {
     try {
       isCleanedUpRef.current = false;
       setFeedback({ type: 'info', message: 'Initializing...' });
+
+      // Initialize performance tracker
+      performanceTrackerRef.current = new ExercisePerformance();
+
+      // Initialize session data
+      setSessionData({
+        scores: [],
+        startTime: Date.now(),
+        peakPerformance: 0,
+        totalRepetitions: 0,
+        consistencyScore: 0,
+        areas: {
+          leftArm: { score: 0, message: '' },
+          rightArm: { score: 0, message: '' }
+        }
+      });
 
       const { mainPose, samplePose } = await initializePoseDetectors();
 
@@ -327,7 +446,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
       cleanupResources();
     }
   };
-
+  // Update the cleanupResources function
   const cleanupResources = () => {
     isCleanedUpRef.current = true;
 
@@ -364,16 +483,36 @@ const EnhancedExerciseComparison = ({ exercise }) => {
       samplePoseRef.current = null;
     }
 
+    // Reset performance tracker
+    performanceTrackerRef.current = null;
+
     setIsRecording(false);
   };
-
+  // Replace the existing stopExercise function
   const stopExercise = () => {
-    cleanupResources();
-    if (exercise?.id) {
-      navigate(`/results/${exercise.id}`);
-    }
-  };
+    // Generate final performance report
+    const finalReport = performanceTrackerRef.current?.generateReport() || {
+      averageScore: 0,
+      duration: '0:00',
+      totalRepetitions: 0,
+      peakPerformance: 0,
+      consistencyScore: 0,
+      improvementRate: 0,
+      performanceOverTime: [],
+      areas: {
+        leftArm: { score: 0, message: '' },
+        rightArm: { score: 0, message: '' }
+      }
+    };
 
+    // Cleanup resources
+    cleanupResources();
+
+    // Navigate to results page with performance data
+    navigate(`/results/${exercise?.id}`, {
+      state: { sessionData: finalReport }
+    });
+  };
   useEffect(() => {
     return () => {
       cleanupResources();
