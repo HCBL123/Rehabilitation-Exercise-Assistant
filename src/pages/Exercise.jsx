@@ -6,26 +6,26 @@ import ExerciseCard from '../components/ExerciseCard';
 const Exercise = () => {
   const [difficulty, setDifficulty] = useState('All');
 
-  const filteredExercises = exercises.filter(exercise => 
+  const filteredExercises = exercises.filter(exercise =>
     difficulty === 'All' || exercise.difficulty === difficulty
   );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Available Exercises</h1>
-      
+      <h1 className="text-3xl font-bold mb-8">Danh Sách Bài Tập</h1>
+
       {/* Difficulty Filter */}
       <div className="mb-8">
-        <label className="mr-4">Filter by difficulty:</label>
-        <select 
+        <label className="mr-4">Lọc theo độ khó:</label>
+        <select
           value={difficulty}
           onChange={(e) => setDifficulty(e.target.value)}
           className="border rounded-lg px-4 py-2"
         >
-          <option value="All">All Levels</option>
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
+          <option value="All">Tất Cả Cấp Độ</option>
+          <option value="Easy">Dễ</option>
+          <option value="Medium">Trung Bình</option>
+          <option value="Hard">Khó</option>
         </select>
       </div>
 

@@ -15,11 +15,11 @@ const Compare = () => {
       try {
         const exerciseData = getExerciseById(exerciseId);
         if (!exerciseData) {
-          throw new Error('Exercise not found');
+          throw new Error('Không tìm thấy bài tập');
         }
         setExercise(exerciseData);
       } catch (error) {
-        console.error('Error loading exercise:', error);
+        console.error('Lỗi khi tải bài tập:', error);
       } finally {
         setIsLoading(false);
       }

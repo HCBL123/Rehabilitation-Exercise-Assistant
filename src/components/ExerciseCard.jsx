@@ -7,15 +7,15 @@ const ExerciseCard = ({ exercise }) => {
 
   return (
     <div className="card hover:shadow-lg transition-shadow">
-      <img 
-        src={exercise.imageUrl} 
+      <img
+        src={exercise.imageUrl}
         alt={exercise.name}
         className="w-full h-48 object-cover rounded-lg mb-4"
       />
-      
+
       <h3 className="text-xl font-semibold mb-2">{exercise.name}</h3>
       <p className="text-gray-600 mb-4">{exercise.description}</p>
-      
+
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm text-gray-500">
           Duration: {exercise.duration}
@@ -24,12 +24,12 @@ const ExerciseCard = ({ exercise }) => {
           Difficulty: {exercise.difficulty}
         </span>
       </div>
-      
-      <button 
+
+      <button
         onClick={() => navigate(`/compare/${exercise.id}`)}
         className="btn-primary w-full"
       >
-        Start Exercise
+        Bắt đầu tập
       </button>
     </div>
   );
