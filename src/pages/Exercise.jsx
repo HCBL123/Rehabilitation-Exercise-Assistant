@@ -24,7 +24,7 @@ const Exercise = () => {
         >
           <option value="All">Tất Cả </option>
           <option value="Dễ">Dễ</option>
-          <option value="Trung Bình">Trung Bình</option>
+          <option value="Trung bình">Trung bình</option>
           <option value="Khó">Khó</option>
         </select>
       </div>

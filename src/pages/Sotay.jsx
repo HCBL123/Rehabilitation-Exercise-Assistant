@@ -14,7 +14,7 @@ const exerciseData = [
       "Lặp lại 10 lần"
     ],
     warning: "Không gắng sức quá mức. Dừng lại nếu cảm thấy đau.",
-    imageUrl: "/api/placeholder/400/320"
+    imageUrl: "/assets/images/vai.png"
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ const exerciseData = [
       "Thực hiện 15 lần mỗi chân"
     ],
     warning: "Thực hiện động tác chậm và đều. Tránh các động tác giật cục.",
-    imageUrl: "/api/placeholder/400/320"
+    imageUrl: "/assets/images/goi.jpg"
   },
   {
     id: 3,
@@ -42,7 +42,7 @@ const exerciseData = [
       "Xoay thêm 10 vòng"
     ],
     warning: "Không gắng sức nếu cảm thấy đau hoặc khó chịu.",
-    imageUrl: "/api/placeholder/400/320"
+    imageUrl: "/assets/images/cotay.jpg"
   },
   {
     id: 4,
@@ -56,7 +56,7 @@ const exerciseData = [
       "Lặp lại 8-10 lần"
     ],
     warning: "Thực hiện nhẹ nhàng, tránh các động tác đột ngột có thể gây chấn thương.",
-    imageUrl: "/api/placeholder/400/320"
+    imageUrl: "/assets/images/cotsong.jpg"
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ const exerciseData = [
       "Thực hiện 20 lần mỗi chân"
     ],
     warning: "Không gắng sức quá mức, đặc biệt nếu có tiền sử chấn thương mắt cá chân.",
-    imageUrl: "/api/placeholder/400/320"
+    imageUrl: "/assets/images/matcachan.jpg"
   }
 ];
 
