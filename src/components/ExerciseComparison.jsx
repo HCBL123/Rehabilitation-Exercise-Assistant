@@ -211,7 +211,10 @@ const EnhancedExerciseComparison = ({ exercise }) => {
     let adjustedScore = similarity.score;
     if (inactivityDuration > 2) { // Start decreasing after 2 seconds of inactivity
       adjustedScore = Math.max(0, adjustedScore - (INACTIVITY_PENALTY_RATE * (inactivityDuration - 2) / 100));
-    }
+    } else
+      if (adjustedScore >= 0.55) {
+        adjustedScore = Math.min(1, adjustedScore * 1.5);
+      }
 
     // Update last pose reference
     lastPoseRef.current = currentPose;

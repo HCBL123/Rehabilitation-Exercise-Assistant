@@ -28,6 +28,10 @@ const Navigation = () => {
             <Link to="/" className={`${isActive('/')} hover:text-primary-100`}>
               Trang chủ
             </Link>
+            <Link to="sotay" className={`${isActive('/sotay')} hover:text-primary-100`}>
+              Sổ tay vận động
+            </Link>
+
             <Link
               to="/exercises"
               className={`${isActive('/exercises')} hover:text-primary-100`}

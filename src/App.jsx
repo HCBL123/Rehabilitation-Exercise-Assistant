@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
@@ -5,6 +6,7 @@ import Exercise from './pages/Exercise';
 import Compare from './pages/Compare';
 import About from './pages/About';
 import Navigation from './components/Navigation';
+import Sotay from './pages/Sotay';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="/exercises" element={<Exercise />} />
           <Route path="/compare/:exerciseId" element={<Compare />} />
           <Route path="/about" element={<About />} />
+          <Route path="/sotay" element={<Sotay />} />
+
         </Routes>
       </div>
     </Router>
