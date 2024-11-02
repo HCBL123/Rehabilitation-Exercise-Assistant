@@ -526,7 +526,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
           {/* User Camera */}
           <Card className="overflow-hidden">
             <div className="p-4">
-              <h3 className="text-lg font-semibold">Your Camera</h3>
+              <h3 className="text-lg font-semibold">Camera người tập</h3>
             </div>
             <div className="relative aspect-video bg-gray-900">
               <video
@@ -546,7 +546,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
                     className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
                   >
                     <Camera className="w-5 h-5" />
-                    Start Exercise
+                    Bắt đầu tập
                   </button>
                 </div>
               )}
@@ -566,7 +566,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
         {/* Guide Video */}
         <Card className="overflow-hidden">
           <div className="p-4">
-            <h3 className="text-lg font-semibold">Exercise Guide</h3>
+            <h3 className="text-lg font-semibold">Video hướng dẫn</h3>
           </div>
           <div className="relative aspect-video bg-gray-900">
             <video

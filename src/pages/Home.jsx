@@ -11,10 +11,10 @@ const Home = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold mb-4 text-gray-800">
-            Chào mừng đến với Trợ lý Tập luyện Phục hồi chức năng
+            Chào mừng đến với Trợ lý hỗ trợ tập luyện phục hồi chức năng
           </h1>
           <p className="text-xl text-gray-700 mb-8">
-            Người hướng dẫn cá nhân của bạn để tập luyện phục hồi chức năng an toàn và hiệu quả
+            Hỗ trợ bạn để tự luyện tập phục hồi chức năng an toàn và hiệu quả
           </p>
           <Link
             to="/exercises"

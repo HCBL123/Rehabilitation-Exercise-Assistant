@@ -16,16 +16,16 @@ const Exercise = () => {
 
       {/* Difficulty Filter */}
       <div className="mb-8">
-        <label className="mr-4">Lọc theo độ khó:</label>
+        <label className="mr-4">Lọc theo cấp độ:</label>
         <select
           value={difficulty}
           onChange={(e) => setDifficulty(e.target.value)}
           className="border rounded-lg px-4 py-2"
         >
-          <option value="All">Tất Cả Cấp Độ</option>
-          <option value="Easy">Dễ</option>
-          <option value="Medium">Trung Bình</option>
-          <option value="Hard">Khó</option>
+          <option value="All">Tất Cả </option>
+          <option value="Dễ">Dễ</option>
+          <option value="Trung Bình">Trung Bình</option>
+          <option value="Khó">Khó</option>
         </select>
       </div>
 

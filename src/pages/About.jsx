@@ -45,10 +45,10 @@ const About = () => {
             liên hệ với chúng tôi tại:
           </p>
           <a
-            href="mailto:support@rehabassistant.com"
+            href="mailto:hoangcongbaolong23a5@lqddnedu.vn"
             className="text-primary-600 hover:underline"
           >
-            support@rehabassistant.com
+            hoangcongbaolong23a5@lqddnedu.vn
           </a>
         </div>
       </div>

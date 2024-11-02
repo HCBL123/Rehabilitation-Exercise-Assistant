@@ -18,10 +18,10 @@ const ExerciseCard = ({ exercise }) => {
 
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm text-gray-500">
-          Duration: {exercise.duration}
+          Thời gian: {exercise.duration}
         </span>
         <span className="text-sm text-gray-500">
-          Difficulty: {exercise.difficulty}
+          Độ khó: {exercise.difficulty}
         </span>
       </div>
 

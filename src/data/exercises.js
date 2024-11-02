@@ -2,18 +2,40 @@
 export const exercises = [
   {
     id: 1,
-    name: "Shoulder Flexibility",
-    description: "Gentle shoulder rotations to improve range of motion",
-    difficulty: "Easy",
-    duration: "5 minutes",
+    name: "Phục hồi vai gáy",
+    description: "Bài tập di chuyển tay lên xuống để hồi phục vai",
+    difficulty: "Dễ",
+    duration: "5 phút",
     imageUrl: "/assets/images/shoulder-exercise.jpg",
     samplePoseData: "/assets/sample-poses/shoulder-pose.json",
     sampleVideo: "/assets/videos/vid1.mp4",
     instructions: [
-      "Stand with feet shoulder-width apart",
-      "Raise arms to shoulder height",
-      "Rotate arms in small circles",
-      "Hold for 30 seconds"
+      "Đứng thẳng người",
+
+      "Đưa hai tay ra phía trước",
+
+      "Nâng một cánh tay lên",
+
+      "Hạ xuống và năng cánh tay kia lên"
+    ]
+  },
+  {
+    id: 2,
+    name: "Phục hồi vai gáy",
+    description: "Bài tập di chuyển tay lên xuống để hồi phục vai",
+    difficulty: "Dễ",
+    duration: "5 phút",
+    imageUrl: "/assets/images/shoulder-exercise.jpg",
+    samplePoseData: "/assets/sample-poses/shoulder-pose.json",
+    sampleVideo: "/assets/videos/vid2.mp4",
+    instructions: [
+      "Đứng thẳng người",
+
+      "Đưa hai tay ra phía trước",
+
+      "Nâng một cánh tay lên",
+
+      "Hạ xuống và năng cánh tay kia lên"
     ]
   },
   // Add more exercises...
