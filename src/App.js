@@ -8,6 +8,7 @@ import Compare from './pages/Compare';
 import Results from './pages/Results';
 import About from './pages/About';
 import Sotay from './pages/Sotay';
+import Model from './pages/Model';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/results/:exerciseId" element={<Results />} />
           <Route path="/about" element={<About />} />
           <Route path="/sotay" element={<Sotay />} />
+          <Route path="/model" element={<Model />} />
         </Routes>
       </div>
     </Router>

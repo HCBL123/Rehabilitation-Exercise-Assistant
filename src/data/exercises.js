@@ -1,4 +1,3 @@
-// src/data/exercises.js
 export const exercises = [
   {
     id: 1,

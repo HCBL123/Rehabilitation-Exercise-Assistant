@@ -1,5 +1,3 @@
-//src/components/PoseComparison.js
-
 const KEYPOINTS = {
   LEFT_SHOULDER: 11,
   RIGHT_SHOULDER: 12,
@@ -11,12 +9,10 @@ const KEYPOINTS = {
   RIGHT_HIP: 24,
 };
 
-// Stricter thresholds
 const ANGLE_THRESHOLD = 30; // More strict angle comparison
 const MIN_VISIBILITY = 0.6; // Higher visibility requirement
 const MIN_MOVEMENT_THRESHOLD = 0.1; // Minimum movement to be considered a pose
 
-// Helper function to check if pose is in neutral position (arms down)
 const isNeutralPose = (pose) => {
   try {
     const leftShoulder = pose[KEYPOINTS.LEFT_SHOULDER];
@@ -28,7 +24,6 @@ const isNeutralPose = (pose) => {
       return true;
     }
 
-    // Check if wrists are below shoulders (indicating arms are down)
     const isLeftArmDown = leftWrist.y > leftShoulder.y;
     const isRightArmDown = rightWrist.y > rightShoulder.y;
 
@@ -187,7 +182,6 @@ const comparePoses = (userPose, samplePose) => {
     return { score: 0, details: {} };
   }
 };
-// Shorter history for more responsive scoring
 let scoreHistory = new Array(3).fill(0);
 
 const calculatePoseSimilarity = (() => {
@@ -206,6 +200,8 @@ const calculatePoseSimilarity = (() => {
       // Update score history
       scoreHistory.push(comparison.score);
       scoreHistory.shift();
+
+      //P = 50*(w1(1+cos(a))) + w2*(1-d/k)*(w1+w2);
 
       // Simple average without boosting
       const smoothedScore = scoreHistory.reduce((a, b) => a + b) / scoreHistory.length;

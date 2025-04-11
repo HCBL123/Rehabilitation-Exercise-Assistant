@@ -1,4 +1,3 @@
-// src/pages/Exercise.jsx
 import React, { useState } from 'react';
 import { exercises } from '../data/exercises';
 import ExerciseCard from '../components/ExerciseCard';

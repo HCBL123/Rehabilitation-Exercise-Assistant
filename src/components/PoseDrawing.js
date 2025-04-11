@@ -1,4 +1,3 @@
-// Drawing configuration
 const POSE_CONNECTIONS = [
   ['left_ear', 'left_eye_outer'],
   ['left_eye_outer', 'left_eye'],

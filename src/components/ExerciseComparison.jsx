@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera } from 'lucide-react';
@@ -213,7 +212,7 @@ const EnhancedExerciseComparison = ({ exercise }) => {
       adjustedScore = Math.max(0, adjustedScore - (INACTIVITY_PENALTY_RATE * (inactivityDuration - 2) / 100));
     } else
       if (adjustedScore >= 0.55) {
-        adjustedScore = Math.min(1, adjustedScore * 1.5);
+        adjustedScore = Math.min(1, adjustedScore * 1.9);
       }
 
     // Update last pose reference

@@ -1,111 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Dumbbell, Info, Book } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
-const Navigation = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+const PatientNavigation = () => {
   const location = useLocation();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
-
-  const navItems = [
-    { path: '/', label: 'Trang chủ', icon: Home },
-    { path: '/exercises', label: 'Bài tập', icon: Dumbbell },
-    { path: '/sotay', label: 'Sổ tay cẩm nang', icon: Book },
-    { path: '/about', label: 'Giới thiệu', icon: Info },
+  const navigationItems = [
+    { path: '/patient/dashboard', label: 'Dashboard' },
+    { path: '/patient/exercises', label: 'Exercises' },
+    { path: '/patient/schedule', label: 'Schedule' },
   ];
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <>
-      {/* Navigation Bar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-primary-600/95 shadow-lg backdrop-blur-sm' : 'bg-primary-600'
-        }`}>
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center space-x-2 text-white"
-            >
-              <Dumbbell size={28} className="text-primary-100" />
-              <span className="text-xl md:text-2xl font-bold">Trợ lý Phục hồi</span>
+    <nav className="bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo and Navigation */}
+          <div className="flex items-center space-x-8">
+            <Link to="/patient/dashboard" className="flex-shrink-0">
+              <span className="text-xl font-semibold text-blue-600">
+                MedRehab
+              </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-6">
-              {navItems.map(({ path, label, icon: Icon }) => (
+            {/* Main Navigation */}
+            <div className="flex items-center space-x-6">
+              {navigationItems.map((item) => (
                 <Link
-                  key={path}
-                  to={path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${isActive(path)
-                    ? 'text-primary-100 bg-white/10'
-                    : 'text-white hover:text-primary-100 hover:bg-white/5'
+                  key={item.path}
+                  to={item.path}
+                  className={`px-1 py-2 text-sm font-medium transition-colors ${isActive(item.path)
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-blue-600'
                     }`}
                 >
-                  <Icon size={18} />
-                  <span className="whitespace-nowrap">{label}</span>
+                  {item.label}
                 </Link>
               ))}
             </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-              aria-label={isOpen ? 'Đóng menu' : 'Mở menu'}
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </div>
 
-          {/* Mobile Navigation */}
-          <div className={`lg:hidden transition-all duration-300 overflow-hidden ${isOpen
-            ? 'max-h-96 opacity-100'
-            : 'max-h-0 opacity-0 pointer-events-none'
-            }`}>
-            <div className="py-4 space-y-2">
-              {navItems.map(({ path, label, icon: Icon }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive(path)
-                    ? 'text-primary-100 bg-white/10'
-                    : 'text-white hover:text-primary-100 hover:bg-white/5'
-                    }`}
-                >
-                  <Icon size={20} />
-                  <span>{label}</span>
-                </Link>
-              ))}
+          {/* Profile Button */}
+          <div className="flex items-center">
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600"
+              >
+                <span>Profile</span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''
+                  }`} />
+              </button>
+
+              {/* Profile Dropdown */}
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                  </div>
+                  <Link
+                    to="/patient/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Settings
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Divider line when scrolled */}
-        <div className={`h-px bg-white/10 transition-opacity duration-300 ${scrolled ? 'opacity-100' : 'opacity-0'
-          }`} />
-      </nav>
-
-      {/* Spacer div to prevent content overlap */}
-      <div className={`h-16 ${isOpen ? 'lg:h-16' : 'h-16'}`} />
-    </>
+      </div>
+    </nav>
   );
 };
 
-export default Navigation;
+export default PatientNavigation; 

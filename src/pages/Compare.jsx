@@ -1,4 +1,3 @@
-// src/pages/Compare.jsx
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getExerciseById } from '../data/exercises';
